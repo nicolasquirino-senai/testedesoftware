@@ -14,8 +14,8 @@ async function carregarComponente(elementId, caminhoArquivo) {
 
 // Gabarito global para uso na verificação e reinicialização
 const GABARITO_QUIZ = {
-    q1: 'b', q2: 'c', q3: 'b', q4: 'b', q5: 'b',
-    q6: 'c', q7: 'b', q8: 'b', q9: 'b', q10: 'c'
+    q1: 'b', q2: 'c', q3: 'a', q4: 'b', q5: 'b',
+    q6: 'b', q7: 'b', q8: 'a', q9: 'b', q10: 'a'
 };
 
 // --- Inicialização ---
