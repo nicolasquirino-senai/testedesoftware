@@ -20,18 +20,20 @@ const GABARITO_QUIZ = {
 
 // --- Inicialização ---
 document.addEventListener('DOMContentLoaded', () => {
-    carregarComponente('header-container', '../components/header.html');
-    carregarComponente('footer-container', '../components/footer.html');
+    // Corrigido: caminhos relativos considerando index.html na raiz do projeto
+    carregarComponente('header-container', 'components/header.html');
+    carregarComponente('footer-container', 'components/footer.html');
     
     inicializarTema();
 });
 
-// --- Lógica de Acessibilidade (Modo Claro) ---
+// --- Lógica de Acessibilidade (Modo Claro/Escuro) ---
 function inicializarTema() {
     const themeToggle = document.getElementById('theme-toggle');
+    if (!themeToggle) return;
+
     const body = document.body;
     
-    // Verifica preferência salva no localStorage
     const temaSalvo = localStorage.getItem('theme');
     if (temaSalvo === 'light') {
         body.classList.add('light-mode');
@@ -51,7 +53,7 @@ function inicializarTema() {
     });
 }
 
-// --- Lógica do Quiz Atualizada ---
+// --- Lógica do Quiz ---
 function verificarQuiz() {
     let pontuacao = 0;
     const totalPerguntas = Object.keys(GABARITO_QUIZ).length;
@@ -60,70 +62,55 @@ function verificarQuiz() {
     
     if (!form) return;
 
-    // Adiciona classe ao form para desabilitar hover visual via CSS e marcar submissão
     form.classList.add('submetido');
-    btnSubmit.disabled = true; // Desabilita botão para evitar reenvio
+    btnSubmit.disabled = true;
 
-    // Itera por cada pergunta no gabarito
     for (let i = 1; i <= totalPerguntas; i++) {
         const perguntaNome = `q${i}`;
         const respostaCorretaVal = GABARITO_QUIZ[perguntaNome];
         
-        // Seleciona o container da pergunta para manipulação do DOM
         const questionContainer = document.getElementById(`${perguntaNome}-container`);
         if (!questionContainer) continue;
 
         const inputs = questionContainer.querySelectorAll('input[type="radio"]');
         const respostaSelecionada = questionContainer.querySelector('input[type="radio"]:checked');
         
-        // Desabilita todos os inputs desta pergunta
         inputs.forEach(input => input.disabled = true);
 
-        // Lógica de Feedback Visual Pergunta por Pergunta
         inputs.forEach(input => {
-            const labelPai = input.parentElement; // Pega o <label> que envolve o input
+            const labelPai = input.parentElement;
 
             if (input.value === respostaCorretaVal) {
-                // É a alternativa correta
                 if (respostaSelecionada && respostaSelecionada.value === respostaCorretaVal) {
-                    // Usuário acertou: fica VERDE
                     labelPai.classList.add('is-correct');
-                    // Incrementa pontuação apenas uma vez por pergunta aqui
                     if (input === respostaSelecionada) pontuacao++; 
                 } else {
-                    // Usuário errou ou não marcou: fica CINZA (gabarito)
                     labelPai.classList.add('was-correct');
                 }
             } else if (respostaSelecionada && input === respostaSelecionada && input.value !== respostaCorretaVal) {
-                // É a alternativa que o usuário marcou E está errada: fica VERMELHO
                 labelPai.classList.add('is-wrong');
             }
         });
     }
 
-    // --- Exibição do Resultado Final ---
     const divResultado = document.getElementById('resultado-quiz');
     const textoResultado = document.getElementById('resultado-texto');
     
-    divResultado.classList.remove('hidden'); // Mostra área de resultado
-    
-    // Rola suavemente até o resultado
+    divResultado.classList.remove('hidden');
     divResultado.scrollIntoView({ behavior: 'smooth', block: 'center' });
 
-    // Define mensagem baseada na pontuação
     if (pontuacao === totalPerguntas) {
         textoResultado.style.color = 'var(--quiz-correct-text)';
         textoResultado.innerHTML = `<h3>Gabaritou! 🎉</h3><p>Você acertou ${pontuacao} de ${totalPerguntas}. Seu conhecimento em QA está pronto para produção! 🚀</p>`;
     } else if (pontuacao >= (totalPerguntas / 2)) {
-        textoResultado.style.color = '#fbbf24'; // Amarelo (não usei variável pois é fixo p/ alerta)
-        textoResultado.innerHTML = `<h3>Bom trabalho!</h3><p>Você acertou ${pontuacao} de ${totalPerguntas}. Passou nos testes principais, mas dê uma revisada nos itens cinzas. 🧐</p>`;
+        textoResultado.style.color = '#fbbf24';
+        textoResultado.innerHTML = `<h3>Bom trabalho!</h3><p>Você acertou ${pontuacao} de ${totalPerguntas}. Passou nos testes principais, mas dê uma revisada nos itens marcados. 🧐</p>`;
     } else {
         textoResultado.style.color = 'var(--quiz-wrong-text)';
         textoResultado.innerHTML = `<h3>Build Failed 🐛</h3><p>Você acertou ${pontuacao} de ${totalPerguntas}. Encontramos falhas críticas. Recomendamos ler o conteúdo acima novamente e refazer o teste.</p>`;
     }
 }
 
-// --- Função Jogar de Novo ---
 function reiniciarQuiz() {
     const form = document.getElementById('quiz-form');
     const btnSubmit = document.getElementById('submit-quiz');
@@ -131,31 +118,19 @@ function reiniciarQuiz() {
     
     if (!form) return;
 
-    // 1. Reseta o formulário (limpa seleções radio)
     form.reset();
-    
-    // 2. Remove classes de estado e habilita submit
     form.classList.remove('submetido');
     btnSubmit.disabled = false;
-    
-    // 3. Esconde área de resultado
     divResultado.classList.add('hidden');
 
-    // 4. Limpa classes de feedback visual e reabilita inputs nas perguntas
     const questions = form.querySelectorAll('.question');
     questions.forEach(question => {
         const labels = question.querySelectorAll('label');
         const inputs = question.querySelectorAll('input[type="radio"]');
         
-        labels.forEach(label => {
-            label.classList.remove('is-correct', 'is-wrong', 'was-correct');
-        });
-        
-        inputs.forEach(input => {
-            input.disabled = false;
-        });
+        labels.forEach(label => label.classList.remove('is-correct', 'is-wrong', 'was-correct'));
+        inputs.forEach(input => input.disabled = false);
     });
 
-    // 5. Rola de volta para o início do quiz
     document.getElementById('quiz').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
