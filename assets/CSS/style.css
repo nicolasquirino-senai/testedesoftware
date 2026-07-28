@@ -1,3 +1,6 @@
+html {
+    scroll-behavior: smooth; /* Faz a rolagem suave ao clicar nos links do menu */
+}
 /* Variáveis de Cores (Tema Tech/Dark - Padrão) */
 :root {
     --bg-color: #0f172a;
@@ -158,8 +161,15 @@ h3 {
 /* Layout Texto + Vídeo */
 .split-layout {
     display: flex;
-    gap: 2rem;
-    align-items: center;
+    gap: 2.5rem; /* Aumentado ligeiramente para afastar o vídeo do texto */
+    align-items: flex-start; /* ALINHA O TOPO do texto com o topo do vídeo */
+}
+
+/* Espaçamento e Leitura dos Parágrafos (RESOLVE O TEXTO COLADO) */
+.text-content p {
+    margin-bottom: 1.25rem; /* Dá espaço de ~20px entre cada parágrafo */
+    line-height: 1.7;        /* Aumenta a distância entre as linhas de texto */
+    font-size: 1.05rem;
 }
 
 @media (max-width: 768px) {
@@ -168,11 +178,28 @@ h3 {
     }
 }
 
-.text-content, .video-container {
-    flex: 1;
+/* Container que controla o tamanho e a proporção do vídeo */
+.video-container {
     width: 100%;
+    max-width: 800px;
+    margin: 2rem auto 0;
+    position: relative;
+    padding-bottom: 45%; /* Proporção 16:9 ajustada pro max-width */
+    height: 0;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
 }
 
+/* O iframe preenche todo o espaço do container */
+.video-container iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+}
 .divider {
     border: 0;
     height: 1px;
